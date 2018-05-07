@@ -1,0 +1,17 @@
+/bin/
+
+.classpath
+
+.DS_Store
+
+*.bin
+
+.project
+
+*.prefs
+
+.gradle/buildOutputCleanup/cache.properties
+
+.gradle/3.5.1/taskHistory/taskHistory.lock
+
+.gradle/buildOutputCleanup/cache.properties.lock
