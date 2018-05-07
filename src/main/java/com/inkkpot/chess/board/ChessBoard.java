@@ -263,25 +263,14 @@ public class ChessBoard implements Cloneable{
 	public void initializeMin(){
 		ChessPiece piece = null;
 		Colour colr = Colour.WHITE;
-//		piece = new Rook(colr,false);
-//		piecesMap.put(piece.getPosition(), piece);
-//		piece = new Rook(colr,true);
-//		piecesMap.put(piece.getPosition(), piece);
 		piece = new King(colr);
 		piecesMap.put(piece.getPosition(), piece);
 		piece = new Pawn(colr,Position.A7);
 		piecesMap.put(piece.getPosition(), piece);
 		
 		colr = Colour.BLACK;
-//		piece = new Rook(colr,true);
-//		piecesMap.put(piece.getPosition(), piece);
 		piece = new King(colr);
 		piecesMap.put(piece.getPosition(), piece);
-//		piece = new Rook(colr,true);
-//		piecesMap.put(piece.getPosition(), piece);
-//		piece = new Rook(colr,false);
-//		piecesMap.put(piece.getPosition(), piece);
-		
 		
 	}
 	
