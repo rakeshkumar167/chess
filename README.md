@@ -3,7 +3,7 @@
 
 To setup project
 
-checkout the repo
-run ./gradlew eclipse
-Import project in eclipse
-run Game.java
+* checkout the repo
+* run ./gradlew eclipse
+* import project in eclipse
+* run Game.java
