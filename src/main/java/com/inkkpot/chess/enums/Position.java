@@ -15,6 +15,26 @@ public enum Position {
 		return Integer.parseInt(this.toString().charAt(1) + "");
 	}
 	
+	public int getRow() {
+		return getVal();
+	}
+	
+	public int getColumn() {
+		return this.toString().charAt(0) - 'A' + 1;
+	}
+	
+	public static Position getPosition(int row, int col) {
+		if (row < 1 || row > 8 || col < 1 || col > 8) {
+			return null;
+		}
+		String pos = "" + (char)('A' + col - 1) + row;
+		try {
+			return Position.valueOf(pos);
+		} catch (IllegalArgumentException e) {
+			return null;
+		}
+	}
+	
 	public static Position getPositionFromIndex(int index){
 		for(Position pos:Position.values()){
 			if(pos.ordinal() == index){

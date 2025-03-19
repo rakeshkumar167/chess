@@ -42,12 +42,15 @@ public class ChessEngineAlphaBetaPruning implements ChessEngine{
 	public int getNextMoveVal(ChessBoard board, Colour origMoveColour, 
 			Colour nextMoveColor, int level, int alpha, int beta){
 		if (level == 0) {
-			return board.getWhiteValue()-board.getBlackValue();
+			return evaluatePosition(board, origMoveColour);
 		}
 		List<NormalMove> moveList = board.getAvailableMoves(nextMoveColor);
 		if(origMoveColour == nextMoveColor){
 			if(moveList.size()==0){
-				return -10000*level;
+				if (board.isOnCheck(nextMoveColor)) {
+					return -10000 * level; // Checkmate
+				}
+				return 0; // Stalemate
 			}
 			for (NormalMove move : moveList) {
 				ChessBoard newBoard = new ChessBoard();
@@ -55,9 +58,7 @@ public class ChessEngineAlphaBetaPruning implements ChessEngine{
 				CommonUtil.makeMove(newBoard, move.getFrom(), move.getTo());
 				int tempVal = getNextMoveVal(newBoard, origMoveColour, 
 						nextMoveColor.oppositeColour(), level - 1, alpha, beta);
-				if (alpha < tempVal) {
-					alpha = tempVal;
-				}
+				alpha = Math.max(alpha, tempVal);
 				if (alpha >= beta) {
 					return alpha;
 				}
@@ -65,7 +66,10 @@ public class ChessEngineAlphaBetaPruning implements ChessEngine{
 			return alpha;
 		} else {
 			if(moveList.size()==0){
-				return 10000*level;
+				if (board.isOnCheck(nextMoveColor)) {
+					return 10000 * level; // Checkmate
+				}
+				return 0; // Stalemate
 			}
 			for (NormalMove move : moveList) {
 				ChessBoard newBoard = new ChessBoard();
@@ -73,14 +77,32 @@ public class ChessEngineAlphaBetaPruning implements ChessEngine{
 				CommonUtil.makeMove(newBoard, move.getFrom(), move.getTo());
 				int tempVal = getNextMoveVal(newBoard, origMoveColour, 
 						nextMoveColor.oppositeColour(), level - 1, alpha, beta);
-				if (tempVal < beta) {
-					beta = tempVal;
-				}
+				beta = Math.min(beta, tempVal);
 				if (alpha >= beta) {
 					return beta;
 				}
 			}
 			return beta;
 		}
+	}
+
+	private int evaluatePosition(ChessBoard board, Colour colour) {
+		Colour opponent = colour.oppositeColour();
+		
+		// Material value
+		int materialScore = (colour == Colour.WHITE) ? 
+			board.getWhiteValue() - board.getBlackValue() :
+			board.getBlackValue() - board.getWhiteValue();
+			
+		// Positional value
+		int positionalScore = board.getPositionalValue(colour) - board.getPositionalValue(opponent);
+		
+		// Mobility (number of legal moves)
+		int mobilityScore = (board.getAvailableMovesCount(colour) - board.getAvailableMovesCount(opponent)) * 10;
+		
+		// Check bonus
+		int checkBonus = board.isOnCheck(opponent) ? 50 : 0;
+		
+		return materialScore + positionalScore + mobilityScore + checkBonus;
 	}
 }

@@ -179,15 +179,15 @@ public class ChessBoard implements Cloneable{
 			return false;
 		}
 		ChessBoard chessBoard = (ChessBoard)obj;
-		if(this.piecesMap.size()!=chessBoard.getPiecesMap().size()){
+		if(this.piecesMap.size() != chessBoard.getPiecesMap().size()){
 			return false;
 		}
-		for(Position position:piecesMap.keySet()){
+		for(Position position : piecesMap.keySet()){
 			if(!chessBoard.getPiecesMap().containsKey(position)){
 				return false;
 			}
-			if(chessBoard.getPiecesMap().get(position).equals(piecesMap.get(position))){
-				return true;
+			if(!chessBoard.getPiecesMap().get(position).equals(piecesMap.get(position))){
+				return false;
 			}
 		}
 		return true;
@@ -308,4 +308,109 @@ public class ChessBoard implements Cloneable{
 		this.computerPlayerColour = computerPlayerColour;
 	}
 
+	public int getPositionalValue(Colour colour) {
+		int value = 0;
+		for (Map.Entry<Position, ChessPiece> entry : piecesMap.entrySet()) {
+			ChessPiece piece = entry.getValue();
+			if (piece.getColor() == colour) {
+				// Center control bonus
+				Position pos = entry.getKey();
+				int row = pos.getRow();
+				int col = pos.getColumn();
+				if (row >= 3 && row <= 6 && col >= 3 && col <= 6) {
+					value += 10;
+				}
+				// Pawn structure bonus
+				if (piece instanceof Pawn) {
+					if (isConnectedPawn(pos)) {
+						value += 5;
+					}
+					if (isPassedPawn(pos, piece.getColor())) {
+						value += 20;
+					}
+				}
+				// King safety
+				if (piece instanceof King) {
+					if (isInEndgame()) {
+						value += centralizeKingEndgame(pos);
+					} else {
+						value += evaluateKingSafety(pos, piece.getColor());
+					}
+				}
+			}
+		}
+		return value;
+	}
+
+	private boolean isConnectedPawn(Position pos) {
+		int col = pos.getColumn();
+		// Check adjacent columns for friendly pawns
+		for (int adjCol = col - 1; adjCol <= col + 1; adjCol += 2) {
+			Position adjPos = Position.getPosition(pos.getRow(), adjCol);
+			if (adjPos != null && piecesMap.containsKey(adjPos)) {
+				ChessPiece adjPiece = piecesMap.get(adjPos);
+				if (adjPiece instanceof Pawn && adjPiece.getColor() == piecesMap.get(pos).getColor()) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private boolean isPassedPawn(Position pos, Colour colour) {
+		int row = pos.getRow();
+		if (colour == Colour.WHITE) {
+			return row == 8;
+		} else {
+			return row == 1;
+		}
+	}
+
+	private boolean isInEndgame() {
+		int majorPieces = 0;
+		for (ChessPiece piece : piecesMap.values()) {
+			if (piece instanceof Queen || piece instanceof Rook) {
+				majorPieces++;
+			}
+		}
+		return majorPieces <= 2;
+	}
+
+	private int centralizeKingEndgame(Position pos) {
+		// In endgame, king should move to center
+		int row = pos.getRow();
+		int col = pos.getColumn();
+		int distanceFromCenter = Math.abs(4 - row) + Math.abs(4 - col);
+		return (7 - distanceFromCenter) * 10;
+	}
+
+	private int evaluateKingSafety(Position pos, Colour colour) {
+		int value = 0;
+		// Prefer back rank in early/mid game
+		int safeRank = colour == Colour.WHITE ? 1 : 8;
+		if (pos.getRow() == safeRank) {
+			value += 30;
+		}
+		// Pawn shield
+		value += countPawnShield(pos, colour) * 10;
+		return value;
+	}
+
+	private int countPawnShield(Position kingPos, Colour colour) {
+		int count = 0;
+		int row = kingPos.getRow();
+		int col = kingPos.getColumn();
+		int pawnRow = colour == Colour.WHITE ? row + 1 : row - 1;
+		
+		for (int checkCol = col - 1; checkCol <= col + 1; checkCol++) {
+			Position checkPos = Position.getPosition(pawnRow, checkCol);
+			if (checkPos != null && piecesMap.containsKey(checkPos)) {
+				ChessPiece piece = piecesMap.get(checkPos);
+				if (piece instanceof Pawn && piece.getColor() == colour) {
+					count++;
+				}
+			}
+		}
+		return count;
+	}
 }

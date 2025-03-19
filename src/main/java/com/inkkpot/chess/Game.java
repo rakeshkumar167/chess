@@ -26,7 +26,7 @@ public class Game {
 	public static final String BOARD_TITLE ="Chess Lite 1.0";
 	public static final String SPLASH_IMAGE = "splash.png";
 	public static final String ICON_IMAGE = "icon.png";
-	public static final int LEVEL_DEPTH = 4;
+	public static final int LEVEL_DEPTH = 3;
 	public static final boolean smallSize = false;
 	public static ChessEngine engine = new ChessEngineAlphaBetaPruning();
 	public static CreateBoard chessBoardUI = new CreateBoard(smallSize);
